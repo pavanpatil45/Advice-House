@@ -1,16 +1,28 @@
 <?php
-
-session_start();
-
-if(!isset($_SESSION['loggedin']) || $_SESSION['loggedin'] !==true)
-{
-    header("location: login.php");
+	include "config.php";
+  if(isset($_SESSION['email'])){
+    $email=$_SESSION['email'];
+    $results = mysqli_query($db,"SELECT * FROM users WHERE email = '{$email}'") or die(mysqli_error($db));
+  
+    $row_cnt=mysqli_num_rows($results);
+    
+    if($row_cnt==1){
+      $row=mysqli_fetch_array($results);
+      $username = $row['username'];
+      $address=$row['address'];
+      $city=$row['city'];
+      $state=$row['state'];
+      $zip=$row['zip'];
+    
+    }
+    
 }
+  else{
+    header("Location:login.php");
+  }
 
 
 ?>
-
-
 <!doctype html>
 <html lang="en">
   <head>
@@ -51,7 +63,7 @@ if(!isset($_SESSION['loggedin']) || $_SESSION['loggedin'] !==true)
   <div class="navbar-collapse collapse">
   <ul class="navbar-nav ml-auto">
   <li class="nav-item active">
-        <a class="nav-link" href="#"> <img src="https://img.icons8.com/metro/26/000000/guest-male.png"> <?php echo "Welcome ". $_SESSION['username']?></a>
+        <a class="nav-link" href="#"> <img src="https://img.icons8.com/metro/26/000000/guest-male.png"> <?php echo "Welcome ". $username ?></a>
       </li>
   </ul>
   </div>
@@ -61,7 +73,7 @@ if(!isset($_SESSION['loggedin']) || $_SESSION['loggedin'] !==true)
 </nav>
 
 <div class="container mt-4">
-<h3><?php echo "Welcome ". $_SESSION['username']?>! You can now use this website</h3>
+<h3><?php echo "Welcome ". $username ?>! You can now use this website</h3>
 <hr>
 
 </div>

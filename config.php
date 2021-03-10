@@ -1,19 +1,20 @@
 <?php
-/*
-This file contains database configuration assuming you are running mysql using user "root" and password ""
-*/
+	$host = 'localhost';
+	$dbname = 'advice-house-db';
+	$user = 'root';
+	$password = '';
 
-define('DB_SERVER', 'localhost');
-define('DB_USERNAME', 'root');
-define('DB_PASSWORD', '');
-define('DB_NAME', 'login');
+	// Establishing connection with MySQL database 
+	$conn = new PDO('mysql: host='.$host.'; dbname='.$dbname, $user, $password);
+	$conn->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 
-// Try connecting to the Database
-$conn = mysqli_connect(DB_SERVER, DB_USERNAME, DB_PASSWORD, DB_NAME);
-
-//Check the connection
-if($conn == false){
-    dir('Error: Cannot connect');
-}
-
+	session_start();
 ?>
+
+
+<?php
+ $db = mysqli_connect('localhost', 'root', '') or
+        die ('Unable to connect. Check connection.');
+        mysqli_select_db($db, 'advice-house-db' ) or die(mysqli_error($db));
+?>
+

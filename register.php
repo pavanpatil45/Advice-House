@@ -1,132 +1,3 @@
-<?php
-require_once "config.php";
-
-$username = $password = $confirm_password = $email = "";
-$username_err = $password_err = $confirm_password_err = $email_err =  "";
-
-if ($_SERVER['REQUEST_METHOD'] == "POST"){
-
-    // Check if username is empty
-    if(empty(trim($_POST["username"]))){
-        $username_err = "Username cannot be blank";
-    }
-    else{
-        $sql = "SELECT id FROM users WHERE username = ?";
-        $stmt = mysqli_prepare($conn, $sql);
-        if($stmt)
-        {
-            mysqli_stmt_bind_param($stmt, "s", $param_username);
-
-            // Set the value of param username
-            $param_username = trim($_POST['username']);
-
-            // Try to execute this statement
-            if(mysqli_stmt_execute($stmt)){
-                mysqli_stmt_store_result($stmt);
-                if(mysqli_stmt_num_rows($stmt) == 1)
-                {
-                    echo "This username is already taken";
-                    
-                }
-                else{
-                    $username = trim($_POST['username']);
-                }
-            }
-            else{
-                echo "Something went wrong";
-            }
-        }
-    }
-
-    mysqli_stmt_close($stmt);
-
-
-    if ($_SERVER['REQUEST_METHOD'] == "POST"){
-
-      // Check if username is empty
-      if(empty(trim($_POST["email"]))){
-          $email_err = "Email cannot be blank";
-      }
-      else{
-          $sql = "SELECT id FROM users WHERE email = ?";
-          $stmt = mysqli_prepare($conn, $sql);
-          if($stmt)
-          {
-              mysqli_stmt_bind_param($stmt, "s", $param_email);
-  
-              // Set the value of param username
-              $param_email = trim($_POST['email']);
-  
-              // Try to execute this statement
-              if(mysqli_stmt_execute($stmt)){
-                  mysqli_stmt_store_result($stmt);
-                  if(mysqli_stmt_num_rows($stmt) == 1)
-                  {
-                      $email_err =  "This email is already present";
-                      
-                  }
-                  else{
-                      $email = trim($_POST['email']);
-                  }
-              }
-              else{
-                  echo "Something went wrong";
-              }
-          }
-      }
-  
-      mysqli_stmt_close($stmt);
-
-
-// Check for password
-if(empty(trim($_POST['password']))){
-    $password_err = "Password cannot be blank";
-}
-elseif(strlen(trim($_POST['password'])) < 5){
-    $password_err = "Password cannot be less than 5 characters";
-}
-else{
-    $password = trim($_POST['password']);
-}
-
-// Check for confirm password field
-if(trim($_POST['password']) !=  trim($_POST['confirm_password'])){
-    $password_err = "Passwords should match";
-}
-
-
-// If there were no errors, go ahead and insert into the database
-if(empty($username_err) && empty($password_err) && empty($confirm_password_err))
-{
-    $sql = "INSERT INTO users (username, password) VALUES (?, ?)";
-    $stmt = mysqli_prepare($conn, $sql);
-    if ($stmt)
-    {
-        mysqli_stmt_bind_param($stmt, "ss", $param_username, $param_password);
-
-        // Set these parameters
-        $param_username = $username;
-        $param_password = password_hash($password, PASSWORD_DEFAULT);
-
-        // Try to execute the query
-        if (mysqli_stmt_execute($stmt))
-        {
-            header("location: login.php");
-        }
-        else{
-            echo "Something went wrong... cannot redirect!";
-        }
-    }
-    mysqli_stmt_close($stmt);
-}
-mysqli_close($conn);
-}
-
-?>
-
-
-
-
 <!doctype html>
 <html lang="en">
   <head>
@@ -135,8 +6,10 @@ mysqli_close($conn);
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 
     <!-- Bootstrap CSS -->
-    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
-
+    
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <script src="js/jquery-2.2.4.min.js"></script>
     <title>PHP login system!</title>
   </head>
   <body>
@@ -169,63 +42,116 @@ mysqli_close($conn);
 <div class="container mt-4">
 <h3>Please Register Here:</h3>
 <hr>
-<form action="" method="post">
+<form >
+
+<div class="alert alert-danger" role="alert" id="reg-error" style="display: none;">
+	</div>
+  <div class="alert alert-success" role="alert" id="suc" style="display: none;">Registration Successful!
+	</div>
   <div class="form-row">
   <div class="form-group col-md-12">
       <label for="inputEmail4">Email</label>
-      <input type="text" class="form-control" name="" id="inputEmail4" placeholder="Email">
+      <input type="text" class="form-control"  id="inputEmail" name="inputEmail" placeholder="Email" required="">
     </div>
     <div class="form-group col-md-6">
       <label for="inputEmail4">Username</label>
-      <input type="text" class="form-control" name="username" id="inputUsername4" placeholder="Username">
+      <input type="text" class="form-control"  id="inputUsername" name="inputUsername" placeholder="Username" required="">
     </div>
     <div class="form-group col-md-6">
       <label for="inputPassword4">Password</label>
-      <input type="password" class="form-control" name ="password" id="inputPassword4" placeholder="Password">
+      <input type="password" class="form-control"  id="inputPassword" name="inputPassword" placeholder="Password" required="">
     </div>
   </div>
   <div class="form-group">
       <label for="inputPassword4">Confirm Password</label>
-      <input type="password" class="form-control" name ="confirm_password" id="inputPassword" placeholder="Confirm Password">
+      <input type="password" class="form-control" name ="confirm_password" id="confirm_password" placeholder="Confirm Password" required="">
     </div>
   <div class="form-group">
-    <label for="inputAddress2">Address 2</label>
-    <input type="text" class="form-control" id="inputAddress2" placeholder="Apartment, studio, or floor">
+    <label for="inputAddress2">Address</label>
+    <input type="text" class="form-control" id="inputAddress" name="inputAddress" placeholder="Apartment, studio, or floor" required="">
   </div>
   <div class="form-row">
     <div class="form-group col-md-6">
       <label for="inputCity">City</label>
-      <input type="text" class="form-control" id="inputCity">
+      <input type="text" class="form-control" id ="inputCity" name="inputCity" required="">
     </div>
     <div class="form-group col-md-4">
       <label for="inputState">State</label>
-      <select id="inputState" class="form-control">
-        <option selected>Choose...</option>
-        <option>...</option>
+      <select id="inputState" name="inputState" class="form-control" required="">
+        <option selected>maharashtra</option>
+        <option selected>UP</option>
+        <option selected>Bihar</option>
+        <option selected>Hariyana</option>
       </select>
+
+
     </div>
     <div class="form-group col-md-2">
       <label for="inputZip">Zip</label>
-      <input type="text" class="form-control" id="inputZip">
+      <input type="number" class="form-control" id="inputZip" name="inputZip" required="" >
     </div>
   </div>
   <div class="form-group">
     <div class="form-check">
-      <input class="form-check-input" type="checkbox" id="gridCheck">
+      <input class="form-check-input" type="checkbox" id="gridCheck" required="">
       <label class="form-check-label" for="gridCheck">
         Check me out
       </label>
     </div>
   </div>
-  <button type="submit" class="btn btn-primary">Sign in</button>
+  <div id="formresult"> </div>
+  <div class="inputfield">
+    <input type="button" value="Register" class="btn btn-primary" id="register" name="register">
+	</div>
 </form>
+
+<script>
+			$(document).ready(function() {
+				$('#register').click(function() {
+				
+          var email = $('#inputEmail').val();
+          var username = $('#inputUsername').val();
+          var password = $('#inputPassword').val();
+        	var confirm_password = $('#confirm_password').val();
+          var addr = $('#inputAddress').val();
+          var city = $('#inputCity').val();
+          var state = $('#inputState').val();
+          var zip = $('#inputZip').val();
+
+    	$.ajax({
+						url: "process_reg.php",
+						method: "POST",
+						data: {email:email, username:username, password:password, confirm_password:confirm_password, addr:addr, city:city, state:state, zip:zip},
+						success: function(error) {
+							if(error == 0) {
+							
+							$('#reg-error').hide();
+              $('#suc').show();
+             
+								
+							}
+							else {
+								document.getElementById("reg-error").innerHTML = error;
+								document.getElementById("reg-error").style.display = "block";
+							}
+						}
+					});
+				});
+			});
+		</script>
+
+
+
+
 </div>
+
+
+
+
 
     <!-- Optional JavaScript -->
     <!-- jQuery first, then Popper.js, then Bootstrap JS -->
-    <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js" integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1" crossorigin="anonymous"></script>
-    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js" integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM" crossorigin="anonymous"></script>
+    
   </body>
 </html>
 
